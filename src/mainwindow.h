@@ -118,6 +118,9 @@ private:
     void setMemoEnabled(int number, bool enabled);
     
     void donate();
+    void website();
+    void discord();
+    void safenodes();
     void addressBook();
     void postToZBoard();
     void importPrivKey();

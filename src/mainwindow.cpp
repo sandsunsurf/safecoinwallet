@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionDiscord, &QAction::triggered, this, &MainWindow::discord);
 
     QObject::connect(ui->actionWebsite, &QAction::triggered, this, &MainWindow::website);
+	
+    QObject::connect(ui->actionSafeNodes, &QAction::triggered, this, &MainWindow::safenodes);
 
     // File a bug
     QObject::connect(ui->actionFile_a_bug, &QAction::triggered, [=]() {
@@ -638,6 +640,11 @@ void MainWindow::discord() {
 
 void MainWindow::website() {
     QString url = "https://safecoin.org";
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void MainWindow::safenodes() {
+    QString url = "https://safenodes.org/";
     QDesktopServices::openUrl(QUrl(url));
 }
 

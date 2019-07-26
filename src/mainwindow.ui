@@ -1212,6 +1212,7 @@
     </property>
     <addaction name="actionDiscord"/>
     <addaction name="actionWebsite"/>
+    <addaction name="actionSafeNodes"/>
     <addaction name="actionDonate"/>
     <addaction name="actionCheck_for_Updates"/>
     <addaction name="actionFile_a_bug"/>
@@ -1271,6 +1272,11 @@
   <action name="actionWebsite">
    <property name="text">
     <string>&amp;Safecoin Website</string>
+   </property>
+  </action>
+  <action name="actionSafeNodes">
+   <property name="text">
+    <string>&amp;SafeNodes</string>
    </property>
   </action>
   <action name="actionCheck_for_Updates">
