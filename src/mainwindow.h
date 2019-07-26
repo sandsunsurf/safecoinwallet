@@ -2,7 +2,9 @@
 #define MAINWINDOW_H
 
 #include "precompiled.h"
+
 #include "logger.h"
+#include "recurring.h"
 
 // Forward declare to break circular dependency.
 class RPC;
@@ -60,6 +62,12 @@ public:
     void updateTAddrCombo(bool checked);
     void updateFromCombo();
 
+    // Disable recurring on mainnet
+    void disableRecurring();
+
+    // Check whether the RPC is returned and payments are ready to be made
+    bool isPaymentsReady() { return uiPaymentsReady; }
+
     Ui::MainWindow*     ui;
 
     QLabel*             statusLabel;
@@ -76,18 +84,18 @@ private:
 
     void setupSendTab();
     void setupTransactionsTab();
-    void setupRecieveTab();
+    void setupReceiveTab();
     void setupBalancesTab();
     void setupZcashdTab();
 
     void setupTurnstileDialog();
     void setupSettingsModal();
     void setupStatusBar();
-
-    void removeExtraAddresses();
+    
+    void clearSendForm();
 
     Tx   createTxFromSendPage();
-    bool confirmTx(Tx tx);
+    bool confirmTx(Tx tx, RecurringPaymentInfo* rpi);
 
     void turnstileDoMigration(QString fromAddr = "");
     void turnstileProgress();
@@ -110,8 +118,6 @@ private:
     void setMemoEnabled(int number, bool enabled);
     
     void donate();
-    void website();
-    void discord();
     void addressBook();
     void postToZBoard();
     void importPrivKey();
@@ -135,6 +141,8 @@ private:
     QCompleter*         labelCompleter  = nullptr;
     QRegExpValidator*   amtValidator    = nullptr;
     QRegExpValidator*   feesValidator   = nullptr;
+
+    RecurringPaymentInfo* sendTxRecurringInfo = nullptr;
 
     QMovie*      loadingMovie;
 };

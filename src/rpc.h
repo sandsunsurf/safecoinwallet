@@ -31,6 +31,15 @@ struct WatchedTx {
     std::function<void(QString, QString)> error;
 };
 
+struct MigrationStatus {
+    bool            available;     // Whether the underlying zcashd supports migration?
+    bool            enabled;
+    QString         saplingAddress;
+    double          unmigrated;
+    double          migrated;
+    QList<QString>  txids;
+};
+
 class RPC
 {
 public:
@@ -38,8 +47,8 @@ public:
     ~RPC();
 
     void setConnection(Connection* c);
-    void setEZcashd(std::shared_ptr<QProcess> p);
-    const QProcess* getEZcashD() { return ezcashd.get(); }
+    void setEZcashd(QProcess* p);
+    const QProcess* getEZcashD() { return ezcashd; }
 
     void refresh(bool force = false);
 
@@ -88,10 +97,14 @@ public:
     Turnstile*  getTurnstile()  { return turnstile; }
     Connection* getConnection() { return conn; }
 
+    const MigrationStatus*      getMigrationStatus() { return &migrationStatus; }
+    void                        setMigrationStatus(bool enabled);
+
 private:
     void refreshBalances();
 
     void refreshTransactions();    
+    void refreshMigration();
     void refreshSentZTrans();
     void refreshReceivedZTrans(QList<QString> zaddresses);
 
@@ -108,8 +121,9 @@ private:
     void getZAddresses          (const std::function<void(json)>& cb);
     void getTAddresses          (const std::function<void(json)>& cb);
 
+
     Connection*                 conn                        = nullptr;
-    std::shared_ptr<QProcess>   ezcashd                     = nullptr;
+    QProcess*                   ezcashd                     = nullptr;
 
     QList<UnspentOutput>*       utxos                       = nullptr;
     QMap<QString, double>*      allBalances                 = nullptr;
@@ -129,6 +143,9 @@ private:
     Ui::MainWindow*             ui;
     MainWindow*                 main;
     Turnstile*                  turnstile;
+
+    // Sapling turnstile migration status (for the zcashd v2.0.5 tool)
+    MigrationStatus             migrationStatus;
 
     // Current balance in the UI. If this number updates, then refresh the UI
     QString                     currentBalance;

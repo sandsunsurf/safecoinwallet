@@ -106,8 +106,6 @@ void Settings::setBlockNumber(int number) {
     this->_blockNumber = number;
 }
 
-// TODOOOOOOOO
-
 bool Settings::isSaplingActive() {
     return  (isTestnet() && getBlockNumber() > 0) ||
 			(!isTestnet() && getBlockNumber() > 547422);
@@ -124,6 +122,22 @@ bool Settings::getAutoShield() {
 
 void Settings::setAutoShield(bool allow) {
     QSettings().setValue("options/autoshield", allow);
+}
+
+bool Settings::getCheckForUpdates() {
+    return QSettings().value("options/allowcheckupdates", true).toBool();
+}
+
+void Settings::setCheckForUpdates(bool allow) {
+     QSettings().setValue("options/allowcheckupdates", allow);
+}
+
+bool Settings::getAllowFetchPrices() {
+    return QSettings().value("options/allowfetchprices", true).toBool();
+}
+
+void Settings::setAllowFetchPrices(bool allow) {
+     QSettings().setValue("options/allowfetchprices", allow);
 }
 
 bool Settings::getAllowCustomFees() {
@@ -162,9 +176,44 @@ void Settings::saveRestore(QDialog* d) {
     });
 }
 
-QString Settings::getUSDFormat(double bal) {
-    return "$" + QLocale(QLocale::English).toString(bal * Settings::getInstance()->getZECPrice(), 'f', 2);
+void Settings::saveRestoreTableHeader(QTableView* table, QDialog* d, QString tablename) {
+    table->horizontalHeader()->restoreState(QSettings().value(tablename).toByteArray());
+
+    QObject::connect(d, &QDialog::finished, [=](auto) {
+        QSettings().setValue(tablename, table->horizontalHeader()->saveState());
+    });
 }
+
+void Settings::openAddressInExplorer(QString address) {
+    QString url;
+    if (Settings::getInstance()->isTestnet()) {
+        url = "https://testnet.safecoin.org/address/" + address;
+    } else {
+        url = "https://explorer.safecoin.org/address/" + address;
+    }
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void Settings::openTxInExplorer(QString txid) {
+    QString url;
+    if (Settings::getInstance()->isTestnet()) {
+        url = "https://testnet.safecoin.org/tx/" + txid;
+    }
+    else {
+        url = "https://explorer.safecoin.org/tx/" + txid;
+    }
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+QString Settings::getUSDFormat(double bal) {
+    return "$" + QLocale(QLocale::English).toString(bal, 'f', 2);
+}
+
+
+QString Settings::getUSDFromZecAmount(double bal) {
+    return getUSDFormat(bal * Settings::getInstance()->getZECPrice());
+}
+
 
 QString Settings::getDecimalString(double amt) {
     QString f = QString::number(amt, 'f', 8);
@@ -184,9 +233,9 @@ QString Settings::getZECDisplayFormat(double bal) {
 }
 
 QString Settings::getZECUSDDisplayFormat(double bal) {
-    auto usdFormat = getUSDFormat(bal);
+    auto usdFormat = getUSDFromZecAmount(bal);
     if (!usdFormat.isEmpty())
-        return getZECDisplayFormat(bal) % " (" % getUSDFormat(bal) % ")";
+        return getZECDisplayFormat(bal) % " (" % usdFormat % ")";
     else
         return getZECDisplayFormat(bal);
 }
@@ -200,6 +249,19 @@ QString Settings::getTokenName() {
         return "SAFE";
     }
 }
+
+//QString Settings::getDonationAddr(bool sapling) {
+//    if (Settings::getInstance()->isTestnet()) 
+//        if (sapling)
+//            return "ztestsapling1wn6889vznyu42wzmkakl2effhllhpe4azhu696edg2x6me4kfsnmqwpglaxzs7tmqsq7kudemp5";
+//        else
+//            return "ztn6fYKBii4Fp4vbGhkPgrtLU4XjXp4ZBMZgShtopmDGbn1L2JLTYbBp2b7SSkNr9F3rQeNZ9idmoR7s4JCVUZ7iiM5byhF";
+//    else 
+//        if (sapling)
+//            return "zs1gv64eu0v2wx7raxqxlmj354y9ycznwaau9kduljzczxztvs4qcl00kn2sjxtejvrxnkucw5xx9u";
+//        else
+//            return "zcEgrceTwvoiFdEvPWcsJHAMrpLsprMF6aRJiQa3fan5ZphyXLPuHghnEPrEPRoEVzUy65GnMVyCTRdkT6BYBepnXh6NBYs";    
+//}
 
 QString Settings::getDonationAddr(bool sapling) {
     if (Settings::getInstance()->isTestnet())  {
@@ -272,6 +334,16 @@ QString Settings::getZboardAddr() {
     }
 }
 
+//bool Settings::isValidAddress(QString addr) {
+//    QRegExp zcexp("^z[a-z0-9]{94}$",  Qt::CaseInsensitive);
+//    QRegExp zsexp("^z[a-z0-9]{77}$",  Qt::CaseInsensitive);
+//    QRegExp ztsexp("^ztestsapling[a-z0-9]{76}", Qt::CaseInsensitive);
+//    QRegExp texp("^t[a-z0-9]{34}$", Qt::CaseInsensitive);
+//
+//    return  zcexp.exactMatch(addr)  || texp.exactMatch(addr) || 
+//            ztsexp.exactMatch(addr) || zsexp.exactMatch(addr);
+//}
+
 bool Settings::isValidAddress(QString addr) {
     QRegExp zsexp("^zs1[a-z0-9]{75}$",  Qt::CaseInsensitive);
     QRegExp ztsexp("^ztestsapling[a-z0-9]{76}", Qt::CaseInsensitive);
@@ -292,7 +364,7 @@ PaymentURI Settings::parseURI(QString uri) {
     PaymentURI ans;
 
     if (!uri.startsWith("safecoin:")) {
-        ans.error = "Not a Safecoin payment URI";
+        ans.error = "Not a safecoin payment URI";
         return ans;
     }
 

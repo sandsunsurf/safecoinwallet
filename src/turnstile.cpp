@@ -3,6 +3,8 @@
 #include "balancestablemodel.h"
 #include "rpc.h"
 #include "settings.h"
+#include "ui_migration.h"
+
 
 using json = nlohmann::json;
 
@@ -145,7 +147,7 @@ QList<int> Turnstile::getBlockNumbers(int start, int end, int count) {
     return blocks;
 }
 
-    // Need at least 0.0005 ZEC for this
+    // Need at least 0.0005 SAFE for this
 double Turnstile::minMigrationAmount = 0.0005;
 
 QList<double> Turnstile::splitAmount(double amount, int parts) {
@@ -179,7 +181,7 @@ void Turnstile::fillAmounts(QList<double>& amounts, double amount, int count) {
     }
 
     // Get a random amount off the total amount and call recursively.
-    // Multiply by hundred, because we'll operate on 0.01 ZEC minimum. We'll divide by 100 later on 
+    // Multiply by hundred, because we'll operate on 0.01 SAFE minimum. We'll divide by 100 later on 
     // in this function.
     double curAmount = std::rand() % (int)std::floor(amount * 100);
 
@@ -244,6 +246,11 @@ ProgressReport Turnstile::getPlanProgress() {
 void Turnstile::executeMigrationStep() {
     // Do a step only if not syncing, else wait for the blockchain to catch up
     if (Settings::getInstance()->isSyncing())
+        return;
+
+    // Also, process payments only when the Payments UI is ready, otherwise
+    // we might mess things up
+    if (!mainwindow->isPaymentsReady())
         return;
 
     auto plan = readMigrationPlan();
@@ -369,4 +376,98 @@ void Turnstile::doSendTx(Tx tx, std::function<void(void)> cb) {
             QMessageBox::critical(mainwindow, QObject::tr("Transaction Error"), errStr, QMessageBox::Ok);            
         });
     
+}
+
+
+// Methods for safecoind native Migration
+void Turnstile::showZcashdMigration(MainWindow* parent) {
+    // If it is not enabled, don't show the dialog
+    if (! parent->getRPC()->getMigrationStatus()->available)
+        return;
+
+    Ui_MigrationDialog md;
+    QDialog d(parent);
+    md.setupUi(&d);
+    Settings::saveRestore(&d);
+
+    MigrationTxns model(md.tblTxids, parent->getRPC()->getMigrationStatus()->txids);
+    md.tblTxids->setModel(&model);
+
+    // Table right click
+    md.tblTxids->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(md.tblTxids, &QTableView::customContextMenuRequested, [=, &model] (QPoint pos) {
+        QModelIndex index = md.tblTxids->indexAt(pos);
+        if (index.row() < 0) return;
+
+        QMenu menu(parent);
+        QString txid = model.getTxid(index.row());
+
+        menu.addAction("Copy txid", [=]() {
+            QGuiApplication::clipboard()->setText(txid);
+        });
+
+        menu.addAction(QObject::tr("View on block explorer"), [=] () {
+            QString url;
+            if (Settings::getInstance()->isTestnet()) {
+                url = "https://testnet.safecoin.org/tx/" + txid;
+            } else {
+                url = "https://explorer.safecoin.org/tx/" + txid;
+            }
+            QDesktopServices::openUrl(QUrl(url));
+        });
+
+        menu.exec(md.tblTxids->viewport()->mapToGlobal(pos));
+    });
+
+    auto* status = parent->getRPC()->getMigrationStatus();
+
+    md.chkEnabled->setChecked(status->enabled);
+    md.lblSaplingAddress->setText(status->saplingAddress);
+    md.lblUnMigrated->setText(Settings::getZECDisplayFormat(status->unmigrated));
+    md.lblMigrated->setText(Settings::getZECDisplayFormat(status->migrated));
+
+    if (d.exec() == QDialog::Accepted) {
+        // Update the migration status if it changed
+        if (md.chkEnabled->isChecked() != status->enabled) {
+            parent->getRPC()->setMigrationStatus(md.chkEnabled->isChecked());
+        }
+    }
+}
+
+
+MigrationTxns::MigrationTxns(QTableView *parent, QList<QString> txids)
+     : QAbstractTableModel(parent) {
+    headers << tr("Migration Txids");
+    this->txids = txids;
+}
+
+
+int MigrationTxns::rowCount(const QModelIndex&) const {
+    return txids.size();
+}
+
+int MigrationTxns::columnCount(const QModelIndex&) const {
+    return headers.size();
+}
+
+QString MigrationTxns::getTxid(int row) const {
+    return txids.at(row);
+}
+
+QVariant MigrationTxns::data(const QModelIndex &index, int role) const {
+    if (role == Qt::DisplayRole) {
+        switch(index.column()) {
+            case 0: return txids.at(index.row());
+        }
+    }
+    return QVariant();
+}  
+
+
+QVariant MigrationTxns::headerData(int section, Qt::Orientation orientation, int role) const {
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
+        return headers.at(section);
+    }
+
+    return QVariant();
 }
