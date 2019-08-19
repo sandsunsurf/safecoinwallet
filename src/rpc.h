@@ -47,6 +47,7 @@ public:
     ~RPC();
 
     void setConnection(Connection* c);
+
     void setEZcashd(QProcess* p);
     const QProcess* getEZcashD() { return ezcashd; }
 

@@ -82,6 +82,8 @@ void RPC::setEZcashd(QProcess* p) {
     }
 }
 
+
+
 // Called when a connection to safecoind is available. 
 void RPC::setConnection(Connection* c) {
     if (c == nullptr) return;
@@ -687,6 +689,11 @@ void RPC::getInfoThenRefresh(bool force) {
 
                     ui->blockheight->setText(QString::number(blockNumber));
                     ui->heightLabel->setText(QObject::tr("Block height"));
+
+                    if (!getConnection()->config->safenode.isEmpty()) {
+
+                    ui->tabWidget->addTab(main->safenodestab, "SafeNodes");
+                    }
                 }
 
             // Update the status bar

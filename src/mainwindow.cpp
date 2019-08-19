@@ -124,9 +124,16 @@ MainWindow::MainWindow(QWidget *parent) :
     // Initialize to the balances tab
     ui->tabWidget->setCurrentIndex(0);
 
+    // Hide Safenodes if not configure
+    safenodestab = ui->tabWidget->widget(5);
+    ui->tabWidget->removeTab(5);
+
     // The safecoind tab is hidden by default, and only later added in if the embedded safecoind is started
     zcashdtab = ui->tabWidget->widget(4);
     ui->tabWidget->removeTab(4);
+
+
+
 
     setupSendTab();
     setupTransactionsTab();
