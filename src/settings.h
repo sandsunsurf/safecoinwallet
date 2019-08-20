@@ -68,7 +68,10 @@ public:
 
     bool    getCheckForUpdates();
     void    setCheckForUpdates(bool allow);
-            
+
+    bool    getUsingSafeNode();
+    void    setUsingSafeNode(bool allow);
+
     bool    isSaplingActive();
 
     void    setUsingZcashConf(QString confLocation);

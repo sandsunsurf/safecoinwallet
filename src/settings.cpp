@@ -132,6 +132,14 @@ void Settings::setCheckForUpdates(bool allow) {
      QSettings().setValue("options/allowcheckupdates", allow);
 }
 
+bool Settings::getUsingSafeNode() {
+    return QSettings().value("options/usingsafenode", true).toBool();
+}
+
+void Settings::setUsingSafeNode(bool allow) {
+     QSettings().setValue("options/usingsafenode", allow);
+}
+
 bool Settings::getAllowFetchPrices() {
     return QSettings().value("options/allowfetchprices", true).toBool();
 }

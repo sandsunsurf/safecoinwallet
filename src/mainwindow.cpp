@@ -516,6 +516,9 @@ void MainWindow::setupSettingsModal() {
         // Fetch prices
         settings.chkFetchPrices->setChecked(Settings::getInstance()->getAllowFetchPrices());
 
+        // Use SafeNodes
+        settings.chkSafeNode->setChecked(Settings::getInstance()->getUsingSafeNode());
+
         // Use Tor
         bool isUsingTor = false;
         if (rpc->getConnection() != nullptr) {
@@ -649,6 +652,9 @@ void MainWindow::setupSettingsModal() {
 
             // Allow fetching prices
             Settings::getInstance()->setAllowFetchPrices(settings.chkFetchPrices->isChecked());
+
+            // use safenodes
+            Settings::getInstance()->setUsingSafeNode(settings.chkSafeNode->isChecked());
 
             if (!isUsingTor && settings.chkTor->isChecked()) {
                 // If "use tor" was previously unchecked and now checked
