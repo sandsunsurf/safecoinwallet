@@ -1,0 +1,13 @@
+# http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+[Desktop Entry]
+Type=Application
+Version=master
+Encoding=UTF-8
+Name=safecoinwallet
+Icon=${SNAP}/meta/gui/icon.ico
+MimeType=x-scheme-handler/safecoinwallet;
+Exec=safecoinwallet
+Terminal=false
+Categories=Office;Finance;
+Comment=SafeCoin KMD fork with MATCH protocol
+Keywords=internet;bitcoin;safe;safecoin;
