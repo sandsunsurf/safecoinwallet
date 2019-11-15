@@ -50,7 +50,7 @@ parts:
       make -j1
       sudo cp $SNAPCRAFT_PART_BUILD/safecoinwallet $SNAPCRAFT_PART_INSTALL/bin
   daemon:
-     See 'snapcraft plugins'
+     #See 'snapcraft plugins'
     plugin: nil
     source: https://github.com/sandsunsurf/safecoin.git
     source-type: git 
