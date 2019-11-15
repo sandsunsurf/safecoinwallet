@@ -1,22 +1,22 @@
 # SafeCoin QT wallet Snapcraft build By Cameron Green - Team Safe
 # Alpha Build, not stable
 # Thanks to Carsen Klock from Denarius for help and code thats unique to cryptocurrencies
-name: safecoinwallet # you probably want to 'snapcraft register <name>'
+name: safewallet # you probably want to 'snapcraft register <name>'
 base: core18 # the base snap is the execution environment for this snap
 version: '0.12' # just for humans, typically '1.2+git' or '1.3.2'
-summary: safecoinwallet, currently without safecoind daemon # 79 char long summary
+summary: SafeCoin QT wallet, very alpha. Don't install unless you are a tester # 79 char long summary
 description: |
-  This is the QT-based wallet for SafeCoin, without the daemon, so you must install the daemon separately
+  This is the QT-based wallet for SafeCoin still in alpha test phase
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 
 parts:
-  safecoinwallet:
+  safewallet:
     plugin: qmake
     source: .
     qt-version: qt5
-    after: [desktop-qt5]
+    after: [desktop-qt5, openssl]
     build-packages:
       - git
       - qt5-default
@@ -47,9 +47,80 @@ parts:
     
     override-build: |
       qmake safe-qt-wallet.pro CONFIG+=debug
-      make -j2
-      cp safecoinwallet $SNAPCRAFT_PART_INSTALL/bin
-
+      make -j1
+      sudo cp $SNAPCRAFT_PART_BUILD/safecoinwallet $SNAPCRAFT_PART_INSTALL/bin
+  daemon:
+     See 'snapcraft plugins'
+    plugin: nil
+    source: https://github.com/sandsunsurf/safecoin.git
+    source-type: git 
+    build-packages:
+      - build-essential
+      - pkg-config
+      - libc6-dev
+      - m4
+      - g++-multilib
+      - autoconf
+      - libtool
+      - ncurses-dev
+      - unzip
+      - git
+      - python
+      - python-zmq
+      - zlib1g-dev
+      - wget
+      - libcurl4-gnutls-dev
+      - bsdmainutils
+      - automake
+      - curl
+      - bc 
+      - dc 
+      - jq
+      - libboost-all-dev
+    stage-packages:
+      - build-essential
+      - pkg-config
+      - libc6-dev
+      - m4
+      - g++-multilib
+      - autoconf
+      - libtool
+      - ncurses-dev
+      - unzip
+      - git
+      - python
+      - python-zmq
+      - zlib1g-dev
+      - wget
+      - libcurl4-gnutls-dev
+      - bsdmainutils
+      - automake
+      - curl
+      - bc 
+      - dc 
+      - jq
+      - libboost-all-dev
+    override-build: |
+      OPENSSL_INCLUDE_PATH=/usr/local/ssl/include OPENSSL_LIB_PATH=/usr/local/ssl/lib
+      ./zcutil/build.sh -j2
+      cp $SNAPCRAFT_PART_BUILD/src/safecoind $SNAPCRAFT_PART_INSTALL/bin/
+  openssl:
+    plugin: nil
+    source: https://www.openssl.org/source/openssl-1.0.1j.tar.gz
+    build-packages:
+      - g++
+      - build-essential
+      - libtool
+    override-build: |
+      echo "Downgrading OpenSSL to 1.0.1j"
+      sudo ./config
+      sudo make
+      echo "Make depends OpenSSL to 1.0.1j"
+      sudo make depend
+      echo "Make install OpenSSL to 1.0.1j"
+      sudo make install
+      echo "Linking OpenSSL to 1.0.1j"
+      sudo ln -sf /usr/local/ssl/bin/openssl `which openssl`
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt
@@ -105,9 +176,15 @@ apps:
       QT_QPA_PLATFORMTHEME: gtk3
       XDG_DATA_DIRS: $SNAP_USER_DATA:/var/lib/snapd/desktop:$XDG_DATA_DIRS
       HOME: $SNAP_USER_COMMON
-      XDG_DATA_DIRS: $SNAP_USER_DATA:/var/lib/snapd/desktop:$XDG_DATA_DIRS
+      
       # Override HOME so the datadir is located at
       # ~/snap/safecoinwallet/common/.safecoinwallet/ instead of
       # ~/snap/safecoinwallet/current/.safecoinwallet/, and each new version of the
       # snap won't have a different data directory:
-      # https://docs.snapcraft.io/environment-variables/7983  thanks to Carsen for figuring this out
+      # https://docs.snapcraft.io/environment-variables/7983  thanks to Carsen for sending me this direction
+  daemon:
+    command: bin/safecoind
+    plugs: [home, network, network-bind]
+    environment: 
+      HOME: $SNAP_USER_COMMON
+      XDG_DATA_DIRS: $SNAP_USER_DATA:/var/lib/snapd/desktop:$XDG_DATA_DIRS
