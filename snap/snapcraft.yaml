@@ -168,7 +168,7 @@ hooks:
   configure:
     plugs: [network, network-bind]
 apps:
-  safecoinwallet:
+  safewallet:
     command: desktop-launch $SNAP/bin/safecoinwallet
     plugs: [home, network, network-bind, unity7, wayland, desktop-legacy, desktop, x11, gsettings]
     desktop: safecoinwallet.desktop
