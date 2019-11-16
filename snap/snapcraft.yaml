@@ -133,7 +133,7 @@ parts:
     plugin: dump
     source: hooks/
     organize:
-      bin/:snap/hooks/
+      bin/: snap/hooks/
 hooks:
   install:
     plugs: [network, network-bind]
