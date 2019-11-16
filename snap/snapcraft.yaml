@@ -159,8 +159,8 @@ parts:
   hooks:
     plugin: dump
     source: hooks/
-    #organize:
-      #bin/:snap/hooks/
+    organize:
+      bin/:snap/hooks/
 hooks:
   install:
     plugs: [network, network-bind]
