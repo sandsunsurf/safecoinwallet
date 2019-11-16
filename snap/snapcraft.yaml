@@ -17,7 +17,7 @@ parts:
     source: https://github.com/sandsunsurf/safecoinwallet.git
     source-type: git
     qt-version: qt5
-    after: [desktop-qt5, openssl]
+    after: [openssl]
     build-packages:
       - git
       - qt5-default
@@ -122,39 +122,12 @@ parts:
       sudo make install
       echo "Linking OpenSSL to 1.0.1j"
       sudo ln -sf /usr/local/ssl/bin/openssl `which openssl`
-  desktop-qt5:
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: qt
-    plugin: make
-    make-parameters: ["FLAVOR=qt5"]
-    build-packages:
-      - build-essential
-      - qtbase5-dev
-      - dpkg-dev
-    stage-packages:
-      - libxkbcommon0
-      - ttf-ubuntu-font-family
-      - dmz-cursor-theme
-      - light-themes
-      - adwaita-icon-theme
-      - gnome-themes-standard
-      - shared-mime-info
-      - libqt5gui5
-      - libgdk-pixbuf2.0-0
-      - libqt5svg5 # for loading icon themes which are svg
-      - try: [appmenu-qt5] # not available on core18
-      - locales-all
-      - xdg-user-dirs
-      - fcitx-frontend-qt5
-    organize:
-      /bin: bin/desktop-qt5/bin 
-
   qt5-gtk-platform:
     plugin: nil
     stage-packages:
       - qt5-gtk-platformtheme
   desktop:
-    source: snap/gui 
+    source: /gui 
     plugin: dump
   hooks:
     plugin: dump
