@@ -14,7 +14,8 @@ confinement: devmode # use 'strict' once you have the right plugs and slots
 parts:
   safewallet:
     plugin: qmake
-    source: .
+    source: https://github.com/sandsunsurf/safecoinwallet.git
+    source-type: git
     qt-version: qt5
     after: [desktop-qt5, openssl]
     build-packages:
