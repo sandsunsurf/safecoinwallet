@@ -127,7 +127,7 @@ parts:
     stage-packages:
       - qt5-gtk-platformtheme
   desktop: 
-    source: https://github.com/sandsunsurf/safecoinwallet.git
+    source: .
     source-subdir: /gui 
     plugin: dump
   hooks:
