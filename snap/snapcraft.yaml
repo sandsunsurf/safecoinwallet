@@ -18,6 +18,8 @@ parts:
     source-type: git
     qt-version: qt5
     after: [openssl]
+    organize: 
+      bin/: safewallet/bin/
     build-packages:
       - git
       - qt5-default
