@@ -19,7 +19,7 @@ parts:
     qt-version: qt5
     after: [openssl]
     organize: 
-      bin/: safewalletbin/bin/
+      bin: safewalletbin/bin
     build-packages:
       - git
       - qt5-default
@@ -107,6 +107,8 @@ parts:
       OPENSSL_INCLUDE_PATH=/usr/local/ssl/include OPENSSL_LIB_PATH=/usr/local/ssl/lib
       ./zcutil/build.sh -j4
       cp $SNAPCRAFT_PART_BUILD/src/safecoind $SNAPCRAFT_PART_INSTALL/bin/
+    organize:
+      bin: daemonbin/bin
   openssl:
     plugin: nil
     source: https://www.openssl.org/source/openssl-1.0.1j.tar.gz
@@ -130,7 +132,7 @@ parts:
     plugin: make
     make-parameters: ["FLAVOR=qt5"]
     organize:
-      bin/: qtbin/bin/
+      bin: qtbin/bin
     build-packages:
       - qtbase5-dev
       - dpkg-dev
