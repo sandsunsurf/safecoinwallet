@@ -157,6 +157,8 @@ parts:
     source: https://github.com/sandsunsurf/safecoinwallet.git
     source-subdir: /gui 
     plugin: dump
+    prime:
+      - gui/
   hooks:
     plugin: dump
     source: hooks/
@@ -173,7 +175,7 @@ apps:
   safewallet:
     command: desktop-launch $SNAP/bin/safecoinwallet
     plugs: [home, network, network-bind, unity7, wayland, desktop-legacy, desktop, x11, gsettings]
-    desktop: safecoinwallet.desktop
+    desktop: gui/safecoinwallet.desktop
     environment:
       QT_QPA_PLATFORMTHEME: gtk3
       XDG_DATA_DIRS: $SNAP_USER_DATA:/var/lib/snapd/desktop:$XDG_DATA_DIRS
