@@ -19,7 +19,7 @@ parts:
     qt-version: qt5
     after: [openssl]
     organize: 
-      bin/: safewallet/bin/
+      bin/: safewalletbin/bin/
     build-packages:
       - git
       - qt5-default
@@ -129,6 +129,8 @@ parts:
     source-subdir: qt
     plugin: make
     make-parameters: ["FLAVOR=qt5"]
+    organize:
+      bin/: qtbin/bin/
     build-packages:
       - qtbase5-dev
       - dpkg-dev
