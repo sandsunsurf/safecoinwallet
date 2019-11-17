@@ -14,4 +14,4 @@ CONFIG="$DATA_DIR/safecoin.conf"
 # snapctl set rpcpass=$RPCPASS
 
 # Updated to support Parallel Snap Installs
-snapctl stop --disable $SNAP_INSTANCE_NAME.safecoind
+snapctl stop --disable $SNAP_INSTANCE_NAME.daemon
